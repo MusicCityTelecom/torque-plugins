@@ -17,6 +17,7 @@ class DiagnosticEngine(
         private const val PCM_HEADER = "6C10F1"
         private const val EBCM_HEADER = "6C28F1"
         private const val PROFILE = "2004 Corvette C5 / GM P59 initial profile"
+        private const val MIN_QUERY_GAP_MS = 250L
     }
 
     private data class PollJob(
@@ -40,6 +41,7 @@ class DiagnosticEngine(
     private val samples = Collections.synchronizedList(mutableListOf<DiagnosticSnapshot>())
     private var lastEmitMs = 0L
     private var lastRecordMs = 0L
+    private var lastQueryMs = 0L
     private var sessionId = ""
     private var startedAtMs = 0L
 
@@ -59,6 +61,7 @@ class DiagnosticEngine(
         latestSnapshot = null
         lastEmitMs = 0L
         lastRecordMs = 0L
+        lastQueryMs = 0L
 
         val now = SystemClock.elapsedRealtime()
         buildJobs(now)
@@ -103,11 +106,11 @@ class DiagnosticEngine(
 
         // One EBCM request returns all four wheels. Mode 2A requires Torque's
         // "Allow full permissions" option for this plugin.
-        addJob(now, 500L, 0L) { queryWheels() }
+        addJob(now, 1500L, 0L) { queryWheels() }
 
         val currentPids = currentMisfirePids()
         currentPids.forEachIndexed { index, command ->
-            addJob(now, 1600L, 120L + index * 170L) {
+            addJob(now, 3000L, 120L + index * 260L) {
                 queryMisfireCurrent(index, command)
             }
         }
@@ -117,30 +120,30 @@ class DiagnosticEngine(
             "2211F8", "2211F9", "2211FA", "2211FB"
         )
         historyPids.forEachIndexed { index, command ->
-            addJob(now, 20000L, 1600L + index * 350L) {
+            addJob(now, 60000L, 3000L + index * 700L) {
                 queryMisfireHistory(index, command)
             }
         }
 
-        addJob(now, 1000L, 250L) { queryMode01("rpm", 0x0C, 2) { b -> ResponseParser.u16(b) / 4.0 } }
-        addJob(now, 1000L, 700L) { queryMode01("speed_kph", 0x0D, 1) { b -> u8(b[0]).toDouble() } }
+        addJob(now, 5000L, 250L) { queryMode01("rpm", 0x0C, 2) { b -> ResponseParser.u16(b) / 4.0 } }
+        addJob(now, 5000L, 700L) { queryMode01("speed_kph", 0x0D, 1) { b -> u8(b[0]).toDouble() } }
 
-        addJob(now, 6000L, 900L) { queryMode01("load_pct", 0x04, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
-        addJob(now, 6000L, 1300L) { queryMode01("coolant_c", 0x05, 1) { b -> u8(b[0]) - 40.0 } }
-        addJob(now, 6000L, 1700L) { queryMode01("stft_b1_pct", 0x06, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
-        addJob(now, 6000L, 2100L) { queryMode01("ltft_b1_pct", 0x07, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
-        addJob(now, 6000L, 2500L) { queryMode01("stft_b2_pct", 0x08, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
-        addJob(now, 6000L, 2900L) { queryMode01("ltft_b2_pct", 0x09, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
-        addJob(now, 6000L, 3300L) { queryMode01("timing_deg", 0x0E, 1) { b -> u8(b[0]) / 2.0 - 64.0 } }
-        addJob(now, 6000L, 3700L) { queryMode01("maf_gps", 0x10, 2) { b -> ResponseParser.u16(b) / 100.0 } }
-        addJob(now, 6000L, 4100L) { queryMode01("throttle_pct", 0x11, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
-        addJob(now, 6000L, 4500L) { queryMode01("module_v", 0x42, 2) { b -> ResponseParser.u16(b) / 1000.0 } }
-        addJob(now, 6000L, 4900L) { queryMode01("iat_c", 0x0F, 1) { b -> u8(b[0]) - 40.0 } }
-        addJob(now, 6000L, 5300L) { queryMode01("map_kpa", 0x0B, 1) { b -> u8(b[0]).toDouble() } }
-        addJob(now, 10000L, 5700L) { queryMode01("fuel_level_pct", 0x2F, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
-        addJob(now, 6000L, 6100L) { queryTransmissionTemperature() }
-        addJob(now, 3000L, 1500L) { queryOilPressure() }
-        addJob(now, 3000L, 1100L) { queryKnockRetard() }
+        addJob(now, 30000L, 900L) { queryMode01("load_pct", 0x04, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
+        addJob(now, 30000L, 1300L) { queryMode01("coolant_c", 0x05, 1) { b -> u8(b[0]) - 40.0 } }
+        addJob(now, 30000L, 1700L) { queryMode01("stft_b1_pct", 0x06, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
+        addJob(now, 30000L, 2100L) { queryMode01("ltft_b1_pct", 0x07, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
+        addJob(now, 30000L, 2500L) { queryMode01("stft_b2_pct", 0x08, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
+        addJob(now, 30000L, 2900L) { queryMode01("ltft_b2_pct", 0x09, 1) { b -> (u8(b[0]) - 128) * 100.0 / 128.0 } }
+        addJob(now, 30000L, 3300L) { queryMode01("timing_deg", 0x0E, 1) { b -> u8(b[0]) / 2.0 - 64.0 } }
+        addJob(now, 30000L, 3700L) { queryMode01("maf_gps", 0x10, 2) { b -> ResponseParser.u16(b) / 100.0 } }
+        addJob(now, 30000L, 4100L) { queryMode01("throttle_pct", 0x11, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
+        addJob(now, 30000L, 4500L) { queryMode01("module_v", 0x42, 2) { b -> ResponseParser.u16(b) / 1000.0 } }
+        addJob(now, 30000L, 4900L) { queryMode01("iat_c", 0x0F, 1) { b -> u8(b[0]) - 40.0 } }
+        addJob(now, 30000L, 5300L) { queryMode01("map_kpa", 0x0B, 1) { b -> u8(b[0]).toDouble() } }
+        addJob(now, 30000L, 5700L) { queryMode01("fuel_level_pct", 0x2F, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
+        addJob(now, 30000L, 6100L) { queryTransmissionTemperature() }
+        addJob(now, 10000L, 1500L) { queryOilPressure() }
+        addJob(now, 10000L, 1100L) { queryKnockRetard() }
     }
 
     private fun addJob(now: Long, period: Long, offset: Long, action: () -> Unit) {
@@ -154,9 +157,13 @@ class DiagnosticEngine(
                 .filter { it.nextDueMs <= now }
                 .minByOrNull { it.nextDueMs }
 
-            if (due != null) {
+            // The target C5 is J1850 VPW (10.4 kbit/s), and the first
+            // in-car adapter reports ~4.1 PID/s average. Do not let the
+            // plugin hammer the Class 2 bus at the old ~11 requests/s tick.
+            if (due != null && (lastQueryMs == 0L || now - lastQueryMs >= MIN_QUERY_GAP_MS)) {
                 due.nextDueMs = max(now, due.nextDueMs) + due.periodMs
                 due.action()
+                lastQueryMs = SystemClock.elapsedRealtime()
             }
 
             if (now - lastEmitMs >= 250L) {

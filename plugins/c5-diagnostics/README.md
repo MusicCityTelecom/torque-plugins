@@ -94,3 +94,10 @@ The first in-car test showed Torque returning valid Class 2 data followed by an 
     6A200000000000<DATA ERROR
 
 The parser now preserves the valid hex frame before the '<' delimiter and ignores the status trailer. Misfire counters also remain '--' until a real PID response has been parsed, rather than displaying a misleading default zero.
+
+
+## 0.1.2 J1850 bus pacing
+
+The first target vehicle reports J1850 VPW at 10.4 kbit/s and an ELM327-compatible adapter averaging about 4.1 PID reads/second. The scheduler now enforces a hard 250 ms minimum gap between diagnostic requests, slows low-priority support/history channels, and keeps misfire and wheel-speed sampling ahead of background data. This avoids the earlier ~11 requests/second burst potential on a low-bandwidth Class 2 bus.
+
+Do not enable Torque's Faster Communication option merely to increase this plugin's refresh rate on a clone/unknown ELM327 adapter. Reliability and clean frames take priority over display update speed.

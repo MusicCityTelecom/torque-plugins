@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun render(s: DiagnosticSnapshot) {
         statusText.text = if (s.fullTorquePermissions) {
-            "Torque connected — full plugin permission enabled"
+            "Torque connected — full plugin permission enabled • J1850 safe pacing"
         } else {
             "Torque connected — full permission OFF; enable it in Torque plugin settings for wheel data"
         }

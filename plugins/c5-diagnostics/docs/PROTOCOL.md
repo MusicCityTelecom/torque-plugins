@@ -91,3 +91,17 @@ The transmission channel naturally remains empty on vehicles/controllers that do
 - Torque forum plugin binding example: https://torque-bhp.com/community/main-forum/new-plugin-support3rd-party-add-ons-pids-etc/
 - Corvette community PID discussion: https://www.corvetteforum.com/forums/autocrossing-and-roadracing/3486449-scan-tools-and-smart-phones-discussion.html
 - C5 oil pressure / trans temperature field notes: https://racechrono.com/forum/d/1942-1942
+
+
+## First target adapter observations
+
+The initial Corvette test reports:
+
+- OBD protocol: J1850 VPW (10.4K)
+- Adapter identity: OBDII to RS232 Interpreter
+- Reported firmware: ELM327 v1.5
+- Torque PID read speed during observation: current/average about 4.1 PID/s, observed max 12 PID/s
+- Torque Faster Communication: disabled
+- ECU connection: successful, zero adapter errors shown
+
+Version 0.1.2 therefore caps plugin-originated diagnostic requests at four per second (250 ms minimum gap) and deliberately lets lower-priority jobs slip if the queue is busy.
