@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">C5 ABS/TCS Reset</string>
-    <string name="read_abs_codes">Read ABS codes</string>
-    <string name="clear_abs_codes">Clear ABS/TCS</string>
+    <string name="app_name">C5 DTC Maintenance</string>
+    <string name="scan_modules">Scan modules</string>
+    <string name="manual_ebcm_clear">Manual EBCM clear</string>
 </resources>

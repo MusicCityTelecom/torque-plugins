@@ -1,39 +1,76 @@
-# C5 ABS/TCS Reset for Torque Pro
+# C5 DTC Maintenance for Torque Pro
 
-This plugin targets the 2004 Chevrolet Corvette C5 GM Class 2 / SAE J1850 VPW network. It reads the ABS/EBCM diagnostic memory and can perform a single user-confirmed EBCM clear while the vehicle is stationary.
+This plugin targets the 2004 Chevrolet Corvette C5 GM Class 2 / SAE J1850 VPW network.
 
-The dashboard warnings it addresses are the ABS lamp, traction/active-handling lamp, and DIC messages such as `SERVICE ABS` and `SERVICE TRACTION SYS`.
+Version 0.2 expands the original EBCM read/clear utility into a multi-module maintenance scanner for:
 
-## Features
+- `28` TCS/EBCM
+- `40` BCM
+- `99` HVAC
+- `A1` RDCM
 
-- EBCM address `0x28` over the same Class 2 network already validated by the C5 Diagnostics plugin.
-- GM service `19` current and all/history DTC reads.
-- GM service `14` clear after the DTC read.
-- Two valid 0 km/h speed samples before any clear request.
-- Post-clear current-DTC verification.
-- Raw Torque/Class 2 responses for field validation.
+## Watched codes
 
-A successful clear can switch the warning lamps off only if the underlying fault is no longer present. If the EBCM still detects a wheel-speed, power/ground, wiring, steering/yaw, module, or other fault, the warning can return immediately.
+Initial watched-code profile:
 
-This plugin deliberately does **not** continuously or automatically erase a returning ABS/TCS fault.
+- EBCM: `C1242`
+- BCM: `B0502`, `B0507`, `B2482`
+- HVAC: `B0361`, `B0441` plus observation of `B0341`
+- RDCM: `B2283`
+
+The field transcription `B9502` is treated as likely `B0502` because B0502 is the documented C5 RH DRL relay-circuit DTC and is paired with B0507. The transcription `B03441` is ambiguous; B0441 is a documented C5 HVAC actuator-out-of-range DTC, so the plugin watches B0441 and also records B0341 if it is actually returned by the module.
+
+All decoded DTCs and raw Class 2 replies are logged, not only the watched list, so the profile can be corrected from real vehicle responses.
+
+## Automatic maintenance behavior
+
+When Torque connects and full plugin permission is enabled, the plugin performs one automatic maintenance pass:
+
+1. Read vehicle speed twice.
+2. Require 0 km/h before any automatic clear operation.
+3. Read current and all/history DTCs from each watched module.
+4. Save the scan to the app's private JSONL maintenance log.
+5. Clear a watched code automatically only when it is present in all/history and absent from the module's current-DTC response.
+6. Re-read the module after a clear and log the result.
+
+The plugin deliberately does not continuously erase active faults.
+
+In particular, a current `C1242` is logged and left visible. That code is associated with the EBCM/BPMV pump-motor circuit and can cause the EBCM to disable ABS/TCS/Active Handling for the ignition cycle. The warning lamps are therefore useful fault-state indicators and are not automatically suppressed.
+
+Current BCM/HVAC/RDCM watched faults are also logged instead of being erased in a loop. Once the condition is no longer current, the plugin can clean the history entry automatically on the next stationary pass.
+
+## Manual EBCM clear
+
+The manual EBCM-clear button remains available. It:
+
+- requires full Torque plugin permission,
+- verifies 0 km/h twice,
+- reads EBCM DTCs,
+- sends GM service `14`,
+- checks for a positive `54` response,
+- re-reads current EBCM DTCs.
+
+If a current fault remains, the module can immediately set the code and dashboard warning again.
+
+## Local report
+
+Automatic passes are appended to:
+
+    c5-dtc-maintenance.jsonl
+
+inside the application's private files directory. The log is capped at 500 entries. Each entry records module, current/all DTCs, watched-code classification, clear decision, clear acknowledgement, post-clear DTCs, and raw responses.
 
 ## Torque setup
 
-1. Install Torque Pro and connect to the Corvette.
-2. Install this APK.
-3. In Torque plugin settings, enable **Allow full permissions** for **C5 ABS/TCS Reset**.
-4. Open the plugin and use **Read ABS codes**.
-5. With the car stopped, use **Clear ABS/TCS** for one read-then-clear cycle.
+1. Install Torque Pro and connect to the Corvette normally.
+2. Install the C5 DTC Maintenance APK.
+3. In Torque plugin settings, enable **Allow full permissions** for this plugin.
+4. Open the plugin. The automatic scan/history-cleanup pass starts after the Torque service connects.
+5. Use **Scan modules** at any time for a fresh read-only scan.
+6. Use **Manual EBCM clear** only when intentionally clearing the EBCM once.
 
-## Protocol
+## Build
 
-- PCM header: `6C10F1`
-- EBCM header: `6C28F1`
-- Current DTCs: `19C2FF00`
-- All/history DTCs: `19FFFF00`
-- Clear diagnostic information: `14`
-- Positive clear response service: `54`
-
-Build from `plugins/c5-abs-reset/android` with:
+From `plugins/c5-abs-reset/android`:
 
     gradle :app:testDebugUnitTest :app:assembleDebug
