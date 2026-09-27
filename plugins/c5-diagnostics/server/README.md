@@ -28,7 +28,7 @@ Route it to receiver.php using your normal Apache/PHP-FPM configuration. TLS is 
 The receiver:
 
 - accepts POST only
-- limits the request body to 2 MiB
+- limits the request body to 8 MiB
 - requires an integer timestamp within 5 minutes of server time
 - verifies HMAC-SHA256 over timestamp + "." + exact raw request body
 - rejects invalid JSON

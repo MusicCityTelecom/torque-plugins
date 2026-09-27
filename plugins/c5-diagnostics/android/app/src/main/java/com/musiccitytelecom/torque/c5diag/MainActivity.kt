@@ -199,6 +199,11 @@ class MainActivity : AppCompatActivity() {
             append("Throttle: ").append(fmtPct(s.values["throttle_pct"])).append('\n')
             append("Timing: ").append(fmt(s.values["timing_deg"], 1)).append(" deg\n")
             append("Knock retard: ").append(fmt(s.values["knock_retard_deg"], 1)).append(" deg\n")
+            append("Oil pressure: ").append(fmt(s.values["oil_pressure_psi"], 1)).append(" psi\n")
+            append("Trans temp: ").append(fmtTempF(s.values["trans_temp_c"])).append('\n')
+            append("IAT: ").append(fmtTempF(s.values["iat_c"])).append('\n')
+            append("MAP: ").append(fmt(s.values["map_kpa"], 0)).append(" kPa\n")
+            append("Fuel level: ").append(fmtPct(s.values["fuel_level_pct"])).append('\n')
             append("Module voltage: ").append(fmt(s.values["module_v"], 2)).append(" V")
         }
 

@@ -57,6 +57,8 @@ class DiagnosticEngine(
         latestWheel = null
         rawWheelResponse = null
         latestSnapshot = null
+        lastEmitMs = 0L
+        lastRecordMs = 0L
 
         val now = SystemClock.elapsedRealtime()
         buildJobs(now)
@@ -133,6 +135,11 @@ class DiagnosticEngine(
         addJob(now, 6000L, 3700L) { queryMode01("maf_gps", 0x10, 2) { b -> ResponseParser.u16(b) / 100.0 } }
         addJob(now, 6000L, 4100L) { queryMode01("throttle_pct", 0x11, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
         addJob(now, 6000L, 4500L) { queryMode01("module_v", 0x42, 2) { b -> ResponseParser.u16(b) / 1000.0 } }
+        addJob(now, 6000L, 4900L) { queryMode01("iat_c", 0x0F, 1) { b -> u8(b[0]) - 40.0 } }
+        addJob(now, 6000L, 5300L) { queryMode01("map_kpa", 0x0B, 1) { b -> u8(b[0]).toDouble() } }
+        addJob(now, 10000L, 5700L) { queryMode01("fuel_level_pct", 0x2F, 1) { b -> u8(b[0]) * 100.0 / 255.0 } }
+        addJob(now, 6000L, 6100L) { queryTransmissionTemperature() }
+        addJob(now, 3000L, 1500L) { queryOilPressure() }
         addJob(now, 3000L, 1100L) { queryKnockRetard() }
     }
 
@@ -205,6 +212,27 @@ class DiagnosticEngine(
         rawWheelResponse = lines.joinToString(" | ")
         ResponseParser.parseWheelPacket(lines)?.let {
             latestWheel = it
+        }
+    }
+
+    private fun queryTransmissionTemperature() {
+        val lines = torque.query(PCM_HEADER, "221940")
+        val payload = ResponseParser.parseMode22(lines, 0x1940, 1) ?: return
+        values["trans_temp_c"] = u8(payload[0]) - 40.0
+    }
+
+    private fun queryOilPressure() {
+        // C5 field-tested request form includes selector 01 after PID 115C.
+        val lines = torque.query(PCM_HEADER, "22115C01")
+        val payload = ResponseParser.findAfter(
+            lines,
+            intArrayOf(0x62, 0x11, 0x5C, 0x01),
+            1
+        ) ?: return
+
+        val kpa = u8(payload[0]) * 4.326 - 110.313
+        if (kpa >= 0.0) {
+            values["oil_pressure_psi"] = kpa * 0.1450377377
         }
     }
 

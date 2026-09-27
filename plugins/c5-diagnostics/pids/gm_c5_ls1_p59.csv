@@ -17,3 +17,5 @@
 "[C5] Misfire C8 History","MF C8 Hist","0x2211FB","(A*256)+B",0,65535,"count","6C10F1","","",1,0
 "[C5] Knock Retard","KR","0x2211A6","A/255*22.5",0,22.5,"deg","6C10F1","","",1,0
 "[C5] Ignition 1 Voltage","Ign V","0x221141","A/10",0,25,"V","6C10F1","","",1,0
+"[C5] Transmission Fluid Temp","Trans Temp","0x221940","A-40",-40,215,"C","6C10F1","","",1,0
+"[C5] Engine Oil Pressure","Oil Press","0x22115C01","(B*4.326-110.313)*0.1450377377",0,120,"psi","6C10F1","","",1,0

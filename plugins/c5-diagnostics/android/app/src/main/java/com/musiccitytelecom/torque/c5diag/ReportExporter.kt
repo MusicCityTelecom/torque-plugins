@@ -19,7 +19,8 @@ object ReportExporter {
     private val valueColumns = listOf(
         "rpm", "speed_kph", "load_pct", "coolant_c",
         "stft_b1_pct", "ltft_b1_pct", "stft_b2_pct", "ltft_b2_pct",
-        "timing_deg", "maf_gps", "throttle_pct", "module_v", "knock_retard_deg"
+        "timing_deg", "maf_gps", "throttle_pct", "module_v", "knock_retard_deg",
+        "oil_pressure_psi", "trans_temp_c", "iat_c", "map_kpa", "fuel_level_pct"
     )
 
     fun toJson(report: SessionReport): String {

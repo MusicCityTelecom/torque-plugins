@@ -70,3 +70,20 @@ GM knock retard is queried separately with 2211A6.
 Only one request is in flight at a time. The scheduler caps request initiation to roughly one request per 90 ms and assigns faster periods to current misfire and combined wheel data. Lower-priority history/support channels are allowed to slip rather than generate concurrent traffic.
 
 This is intentional for the relatively low-bandwidth Class 2 bus.
+
+
+## Additional C5-oriented channels
+
+Two useful GM enhanced channels are included because they have been field-tested on C5 applications:
+
+- Transmission fluid temperature: 221940, A - 40 degrees C.
+- Engine oil pressure: request 22115C01. After the 62 11 5C 01 response prefix, the next byte is converted to kPa with raw * 4.326 - 110.313, then to psi.
+
+The transmission channel naturally remains empty on vehicles/controllers that do not support it. The oil-temperature PID commonly circulated for GM vehicles is intentionally not promoted as verified here because C5 reports show inconsistent correlation.
+
+## Reference material
+
+- Torque plugin documentation: https://wiki.torque-bhp.com/view/PluginDocumentation
+- Torque forum plugin binding example: https://torque-bhp.com/community/main-forum/new-plugin-support3rd-party-add-ons-pids-etc/
+- Corvette community PID discussion: https://www.corvetteforum.com/forums/autocrossing-and-roadracing/3486449-scan-tools-and-smart-phones-discussion.html
+- C5 oil pressure / trans temperature field notes: https://racechrono.com/forum/d/1942-1942

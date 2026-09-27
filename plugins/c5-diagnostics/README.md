@@ -9,7 +9,8 @@ C5 Diagnostics is the first plugin in the torque-plugins repository. It is initi
 - Session misfire deltas and totals
 - Four-wheel speed dashboard using a single GM EBCM packet when supported
 - Raw EBCM response capture so unverified mappings can be field-validated
-- RPM, vehicle speed, engine load, coolant temperature, MAF, throttle, ignition timing, fuel trims, knock retard and module voltage
+- RPM, vehicle speed, engine load, coolant temperature, intake temperature, MAP, MAF, throttle, ignition timing, fuel trims, knock retard, fuel level and module voltage
+- C5-oriented engine oil pressure and automatic-transmission fluid temperature channels when supported by the PCM
 - JSON and CSV reports
 - Android share-sheet export
 - Optional signed HTTPS webhook upload

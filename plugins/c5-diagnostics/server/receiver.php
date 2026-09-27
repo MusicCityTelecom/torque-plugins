@@ -32,15 +32,15 @@ if (abs($now - (int)$timestamp) > 300) {
 }
 
 $contentLength = isset($_SERVER['CONTENT_LENGTH']) ? (int)$_SERVER['CONTENT_LENGTH'] : 0;
-if ($contentLength > 2 * 1024 * 1024) {
+if ($contentLength > 8 * 1024 * 1024) {
     fail(413, 'report_too_large');
 }
 
-$body = file_get_contents('php://input', false, null, 0, 2 * 1024 * 1024 + 1);
+$body = file_get_contents('php://input', false, null, 0, 8 * 1024 * 1024 + 1);
 if ($body === false || $body === '') {
     fail(400, 'empty_body');
 }
-if (strlen($body) > 2 * 1024 * 1024) {
+if (strlen($body) > 8 * 1024 * 1024) {
     fail(413, 'report_too_large');
 }
 
