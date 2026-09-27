@@ -68,7 +68,9 @@ object ResponseParser {
         )
 
     fun parseWheelPacket(lines: List<String>): WheelSpeeds? {
-        val payload = findAfter(lines, intArrayOf(0x6A, 0x20), 6) ?: return null
+        // First real C5 capture returned 6A20 followed by five bytes:
+        // LF, RF, LR, RR, vehicle speed. There is no sixth auxiliary byte.
+        val payload = findAfter(lines, intArrayOf(0x6A, 0x20), 5) ?: return null
         val u = payload.map { it.toInt() and 0xFF }
         return WheelSpeeds(
             lfKph = u[0].toDouble(),
@@ -76,7 +78,7 @@ object ResponseParser {
             lrKph = u[2].toDouble(),
             rrKph = u[3].toDouble(),
             vssKph = u[4].toDouble(),
-            aux = u[5],
+            aux = -1,
             raw = lines.joinToString(" | "),
             candidate = true
         )

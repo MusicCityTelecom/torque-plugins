@@ -24,9 +24,9 @@ The plugin contains a candidate GM Class 2 EBCM query:
 - Header: 6C28F1
 - Request: 2A0120
 - Expected positive response prefix: 6A20
-- Candidate payload order: LF, RF, LR, RR, VSS, auxiliary byte
+- Observed C5 payload length: five bytes after 6A20; candidate order LF, RF, LR, RR, VSS
 
-This pattern is documented in field captures from another GM Class 2 vehicle, but it is not claimed as verified for the 2004 C5 yet. The plugin therefore labels wheel data as candidate until it has been checked on the target Corvette against known vehicle speed and, ideally, a Tech 2 or equivalent scan tool.
+The first live 2004 C5 test returned 6A200000000000 at standstill, confirming that the target Corvette's EBCM responds to this request with the expected 6A20 prefix and a five-byte payload. Wheel byte order and scaling remain labeled candidate until a moving test is compared with known vehicle speed and, ideally, a Tech 2 or equivalent scan tool.
 
 Torque's published remote API restricts diagnostic modes outside its normal allow-list. Mode 2A therefore requires enabling Torque's "Allow full permissions" option for this plugin. Standard Mode 01 and GM Mode 22 data can still operate without that additional permission.
 

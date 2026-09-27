@@ -42,11 +42,15 @@ Request:
 
 Expected packet signature:
 
-    ... 6A 20 LF RF LR RR VSS AUX ...
+    ... 6A 20 LF RF LR RR VSS ...
 
-The parser deliberately searches for 6A20 and consumes exactly the next six bytes. This handles the observed GM Class 2 response layout where the 01 selector from the request is not echoed because of the J1850 payload-size limit.
+The first live 2004 C5 capture returned exactly this seven-byte packet at standstill:
 
-For v0.1, each speed byte is interpreted as km/h with scale 1.0. The UI labels this channel Candidate until the C5 is field-validated.
+    6A200000000000
+
+That confirms the 6A20 response prefix and five-byte payload on the target Corvette. The parser consumes the next five bytes as four candidate wheel speeds plus vehicle speed.
+
+For v0.1.1, each speed byte is interpreted as km/h with scale 1.0. Standstill now validates the request/response framing; byte order and scaling still need a moving-road comparison before being marked fully verified.
 
 ## Standard Mode 01 channels
 

@@ -20,7 +20,7 @@ class ResponseParserTest {
     @Test
     fun parsesCompactCombinedWheelPacket() {
         val wheel = ResponseParser.parseWheelPacket(
-            listOf("6CF1286A200B0C0D0E0F00")
+            listOf("6CF1286A200B0C0D0E0F")
         )
         assertNotNull(wheel)
         assertEquals(11.0, wheel!!.lfKph, 0.0)
@@ -28,7 +28,7 @@ class ResponseParserTest {
         assertEquals(13.0, wheel.lrKph, 0.0)
         assertEquals(14.0, wheel.rrKph, 0.0)
         assertEquals(15.0, wheel.vssKph, 0.0)
-        assertEquals(0, wheel.aux)
+        assertEquals(-1, wheel.aux)
     }
 
     @Test
