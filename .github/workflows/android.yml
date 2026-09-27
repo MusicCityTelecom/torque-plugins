@@ -4,15 +4,24 @@ on:
   push:
     paths:
       - "plugins/c5-diagnostics/android/**"
+      - "plugins/c5-abs-reset/android/**"
       - ".github/workflows/android.yml"
   pull_request:
     paths:
       - "plugins/c5-diagnostics/android/**"
+      - "plugins/c5-abs-reset/android/**"
       - ".github/workflows/android.yml"
 
 jobs:
-  build-c5-diagnostics:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin:
+          - c5-diagnostics
+          - c5-abs-reset
+
     steps:
       - uses: actions/checkout@v4
 
@@ -33,10 +42,10 @@ jobs:
           gradle-version: "8.9"
 
       - name: Test and build debug APK
-        working-directory: plugins/c5-diagnostics/android
+        working-directory: plugins/${{ matrix.plugin }}/android
         run: gradle :app:testDebugUnitTest :app:assembleDebug --stacktrace
 
       - uses: actions/upload-artifact@v4
         with:
-          name: c5-diagnostics-debug
-          path: plugins/c5-diagnostics/android/app/build/outputs/apk/debug/app-debug.apk
+          name: ${{ matrix.plugin }}-debug
+          path: plugins/${{ matrix.plugin }}/android/app/build/outputs/apk/debug/app-debug.apk
