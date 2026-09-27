@@ -11,18 +11,59 @@ class AbsResetEngine(private val torque: TorqueClient) {
 
     data class StationaryCheck(
         val verified: Boolean,
-        val speedKph: Double?
+        val speedKph: Double?,
+        val source: String
+    )
+
+    private data class MotionSample(
+        val stationary: Boolean,
+        val speedKph: Double,
+        val source: String
     )
 
     fun readVehicleSpeedKph(): Double? =
         ProtocolParser.parseVehicleSpeedKph(torque.query(PCM_HEADER, "010D"))
 
+    private fun readMotionSample(): MotionSample? {
+        val pcmSpeed = readVehicleSpeedKph()
+        if (pcmSpeed != null) {
+            return MotionSample(
+                stationary = pcmSpeed <= 0.1,
+                speedKph = pcmSpeed,
+                source = "PCM PID 010D"
+            )
+        }
+
+        Thread.sleep(BUS_GAP_MS)
+        val wheelRaw = torque.query(C5Modules.EBCM.header, "2A0120")
+        val wheels = ProtocolParser.parseWheelSpeedsKph(wheelRaw) ?: return null
+        val observed = wheels.maxOrNull() ?: return null
+
+        return MotionSample(
+            stationary = wheels.all { it <= 0.1 },
+            speedKph = observed,
+            source = "EBCM wheel speeds"
+        )
+    }
+
     fun verifyStationary(): StationaryCheck {
-        val speed1 = readVehicleSpeedKph() ?: return StationaryCheck(false, null)
+        val sample1 = readMotionSample()
+            ?: return StationaryCheck(false, null, "no usable PCM or EBCM speed response")
+
         Thread.sleep(STATIONARY_VERIFY_MS)
-        val speed2 = readVehicleSpeedKph() ?: return StationaryCheck(false, speed1)
-        val observed = max(speed1, speed2)
-        return StationaryCheck(observed <= 0.1, observed)
+
+        val sample2 = readMotionSample()
+            ?: return StationaryCheck(false, sample1.speedKph, sample1.source)
+
+        val observed = max(sample1.speedKph, sample2.speedKph)
+        val verified = sample1.stationary && sample2.stationary
+        val source = if (sample1.source == sample2.source) {
+            sample1.source
+        } else {
+            sample1.source + " + " + sample2.source
+        }
+
+        return StationaryCheck(verified, observed, source)
     }
 
     fun readCodes(profile: ModuleProfile): ModuleDtcSnapshot {
@@ -128,9 +169,9 @@ class AbsResetEngine(private val torque: TorqueClient) {
         val stationary = verifyStationary()
         if (!stationary.verified) {
             val detail = if (stationary.speedKph == null) {
-                "Unable to verify vehicle speed. Clear was not attempted."
+                "Unable to verify vehicle speed from PCM or EBCM wheel data. Clear was not attempted."
             } else {
-                "Vehicle is moving (${String.format("%.1f", stationary.speedKph)} km/h). Clear is blocked."
+                "Vehicle movement detected (${String.format("%.1f", stationary.speedKph)} km/h via ${stationary.source}). Clear is blocked."
             }
             return AbsClearResult(
                 false,
@@ -168,9 +209,9 @@ class AbsResetEngine(private val torque: TorqueClient) {
         Thread.sleep(STATIONARY_VERIFY_MS)
         val after = readCodes(C5Modules.EBCM)
         val message = if (after.current.isEmpty()) {
-            "EBCM acknowledged the clear. No current ABS/TCS DTC was returned."
+            "EBCM acknowledged the clear at 0 km/h via ${stationary.source}. No current ABS/TCS DTC was returned."
         } else {
-            "EBCM acknowledged the clear, but a current EBCM fault remains or immediately returned."
+            "EBCM acknowledged the clear at 0 km/h via ${stationary.source}, but a current EBCM fault remains or immediately returned."
         }
 
         return AbsClearResult(
