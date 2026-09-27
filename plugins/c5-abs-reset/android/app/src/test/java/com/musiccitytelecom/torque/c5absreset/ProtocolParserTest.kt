@@ -21,8 +21,7 @@ class ProtocolParserTest {
         assertFalse(ProtocolParser.clearAcknowledged(listOf("7F 14 22")))
     }
     @Test fun parsesVehicleSpeed() {
-        assertEquals(32.0,
-            ProtocolParser.parseVehicleSpeedKph(listOf("6C F1 10 41 0D 20 88")),
-            0.0)
+        val speed = ProtocolParser.parseVehicleSpeedKph(listOf("6C F1 10 41 0D 20 88"))
+        assertEquals(32.0, speed!!, 0.0)
     }
 }
