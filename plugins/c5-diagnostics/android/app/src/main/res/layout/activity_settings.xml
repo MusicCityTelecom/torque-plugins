@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vehicle VIN" />
+
+        <EditText
+            android:id="@+id/vinEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters"
+            android:maxLength="17" />
+
+        <CheckBox
+            android:id="@+id/swapC1C2Check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Use P59 C1/C2 corrected current-counter mapping" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="HTTPS report webhook" />
+
+        <EditText
+            android:id="@+id/webhookEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://diag.example.com/torque/report"
+            android:inputType="textUri" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Webhook shared secret" />
+
+        <EditText
+            android:id="@+id/secretEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:hint="Long random secret" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="The client requires HTTPS. The secret is stored in this app's private preferences; do not reuse a password."
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/save" />
+    </LinearLayout>
+</ScrollView>

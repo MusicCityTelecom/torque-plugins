@@ -1,0 +1,19 @@
+"Name","ShortName","ModeAndPID","Equation","Min Value","Max Value","Units","Header","startDiagnostic","stopDiagnostic","scale","minimumRefreshDelayMillis"
+"[C5] Misfire C1 Current (P59 corrected)","MF C1 Cur","0x221206","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C2 Current (P59 corrected)","MF C2 Cur","0x221205","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C3 Current","MF C3 Cur","0x221207","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C4 Current","MF C4 Cur","0x221208","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C5 Current","MF C5 Cur","0x2211EA","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C6 Current","MF C6 Cur","0x2211EB","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C7 Current","MF C7 Cur","0x2211EC","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C8 Current","MF C8 Cur","0x2211ED","A",0,255,"count","6C10F1","","",1,0
+"[C5] Misfire C1 History","MF C1 Hist","0x221201","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C2 History","MF C2 Hist","0x221202","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C3 History","MF C3 Hist","0x221203","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C4 History","MF C4 Hist","0x221204","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C5 History","MF C5 Hist","0x2211F8","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C6 History","MF C6 Hist","0x2211F9","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C7 History","MF C7 Hist","0x2211FA","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Misfire C8 History","MF C8 Hist","0x2211FB","(A*256)+B",0,65535,"count","6C10F1","","",1,0
+"[C5] Knock Retard","KR","0x2211A6","A/255*22.5",0,22.5,"deg","6C10F1","","",1,0
+"[C5] Ignition 1 Voltage","Ign V","0x221141","A/10",0,25,"V","6C10F1","","",1,0
