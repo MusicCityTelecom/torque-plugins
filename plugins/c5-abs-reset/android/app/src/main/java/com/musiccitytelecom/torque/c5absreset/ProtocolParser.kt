@@ -1,7 +1,7 @@
 package com.musiccitytelecom.torque.c5absreset
 
 object ProtocolParser {
-    private val frameRegex = Regex("(?i)(?:[0-9a-f]{2}[\\s:]*){2,}")
+    private val frameRegex = Regex("(?i)(?:[0-9a-f]{2}[\\s:]*){1,}")
 
     fun parseDtcs(lines: List<String>, scope: String): List<AbsDtc> {
         val out = mutableListOf<AbsDtc>()
