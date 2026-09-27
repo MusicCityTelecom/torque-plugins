@@ -74,3 +74,24 @@ inside the application's private files directory. The log is capped at 500 entri
 From `plugins/c5-abs-reset/android`:
 
     gradle :app:testDebugUnitTest :app:assembleDebug
+
+
+## Source-level switches
+
+The main behavior switches are in:
+
+    android/app/src/main/java/com/musiccitytelecom/torque/c5absreset/MaintenanceConfig.kt
+
+They use simple `0` / `1` values so a custom build can be changed without tracing the policy code:
+
+    AUTO_MAINTENANCE_ON_CONNECT = 1
+    AUTO_CLEAR_HISTORY = 1
+    AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE = 0
+    ONE_TAP_EBCM_CLEAR = 1
+    SILENT_AUTOMATIC_PASS = 1
+
+Setting `AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE = 1` permits one automatic stationary clear attempt per app launch for the watched BCM/HVAC/RDCM current codes. It does not include current EBCM safety DTCs such as C1242.
+
+`ONE_TAP_EBCM_CLEAR = 1` makes the manual EBCM button execute the existing one-shot stationary clear immediately instead of displaying a confirmation dialog.
+
+The stationary interlock remains active for every clear request.

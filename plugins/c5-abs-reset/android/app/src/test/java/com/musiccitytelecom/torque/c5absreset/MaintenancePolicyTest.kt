@@ -20,47 +20,86 @@ class MaintenancePolicyTest {
     }
 
     @Test
-    fun blocksCurrentC1242FromAutomaticClear() {
+    fun blocksCurrentC1242EvenWhenNonSafetyOverrideIsEnabled() {
         val s = snapshot(C5Modules.EBCM, listOf("C1242"), listOf("C1242"))
         assertEquals(
             AutoDecision.CURRENT_SAFETY_FAULT_BLOCKED,
-            MaintenancePolicy.decide(s, stationaryVerified = true)
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = true
+            )
         )
     }
 
     @Test
-    fun stillClassifiesCurrentC1242WhenStationaryCheckFails() {
-        val s = snapshot(C5Modules.EBCM, listOf("C1242"), listOf("C1242"))
-        assertEquals(
-            AutoDecision.CURRENT_SAFETY_FAULT_BLOCKED,
-            MaintenancePolicy.decide(s, stationaryVerified = false)
-        )
-    }
-
-    @Test
-    fun clearsHistoryOnlyC1242OnceWhenStationary() {
+    fun clearsHistoryOnlyC1242WhenHistoryAutoClearIsEnabled() {
         val s = snapshot(C5Modules.EBCM, emptyList(), listOf("C1242"))
         assertEquals(
             AutoDecision.CLEAR_HISTORY_ONCE,
-            MaintenancePolicy.decide(s, stationaryVerified = true)
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = false
+            )
         )
     }
 
     @Test
-    fun logsCurrentBodyFaultInsteadOfLoopClearing() {
+    fun leavesHistoryOnlyCodeWhenHistoryAutoClearIsDisabled() {
+        val s = snapshot(C5Modules.RDCM, emptyList(), listOf("B2283"))
+        assertEquals(
+            AutoDecision.ACTIVE_FAULT_LOGGED,
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = false,
+                autoClearCurrentNonSafety = false
+            )
+        )
+    }
+
+    @Test
+    fun currentBodyFaultCanBeEnabledForOneShotClear() {
+        val s = snapshot(C5Modules.BCM, listOf("B0502"), listOf("B0502"))
+        assertEquals(
+            AutoDecision.CLEAR_CURRENT_NON_SAFETY_ONCE,
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = true
+            )
+        )
+    }
+
+    @Test
+    fun currentBodyFaultIsLoggedByDefault() {
         val s = snapshot(C5Modules.BCM, listOf("B0502"), listOf("B0502"))
         assertEquals(
             AutoDecision.ACTIVE_FAULT_LOGGED,
-            MaintenancePolicy.decide(s, stationaryVerified = true)
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = false
+            )
         )
     }
 
     @Test
-    fun clearsHistoryOnlyBodyFaultOnce() {
-        val s = snapshot(C5Modules.BCM, emptyList(), listOf("B0502"))
+    fun noAutomaticClearWhenMoving() {
+        val s = snapshot(C5Modules.RDCM, emptyList(), listOf("B2283"))
         assertEquals(
-            AutoDecision.CLEAR_HISTORY_ONCE,
-            MaintenancePolicy.decide(s, stationaryVerified = true)
+            AutoDecision.NOT_STATIONARY,
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = false,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = true
+            )
         )
     }
 
@@ -74,7 +113,12 @@ class MaintenancePolicyTest {
         )
         assertEquals(
             AutoDecision.CURRENT_READ_UNVERIFIED,
-            MaintenancePolicy.decide(s, stationaryVerified = true)
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = true
+            )
         )
     }
 }

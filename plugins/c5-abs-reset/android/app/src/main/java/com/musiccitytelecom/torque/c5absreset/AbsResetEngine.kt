@@ -118,7 +118,10 @@ class AbsResetEngine(private val torque: TorqueClient) {
             val before = readCodes(profile)
             val decision = MaintenancePolicy.decide(before, stationary.verified)
 
-            if (decision == AutoDecision.CLEAR_HISTORY_ONCE) {
+            val shouldClear = decision == AutoDecision.CLEAR_HISTORY_ONCE ||
+                decision == AutoDecision.CLEAR_CURRENT_NON_SAFETY_ONCE
+
+            if (shouldClear) {
                 Thread.sleep(BUS_GAP_MS)
                 val clearRaw = torque.query(profile.header, "14")
                 val ack = ProtocolParser.clearAcknowledged(clearRaw)

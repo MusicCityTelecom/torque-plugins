@@ -38,7 +38,13 @@ class MainActivity : AppCompatActivity() {
         engine = AbsResetEngine(torque)
 
         scanButton.setOnClickListener { scanAllModules() }
-        clearButton.setOnClickListener { confirmManualEbcmClear() }
+        clearButton.setOnClickListener {
+            if (MaintenanceConfig.ONE_TAP_EBCM_CLEAR == 1) {
+                performManualEbcmClear()
+            } else {
+                confirmManualEbcmClear()
+            }
+        }
 
         logText.text = MaintenanceLog.summary(this)
     }
@@ -55,7 +61,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            if (ok && torque.hasFullPermissions() && automaticPassStarted.compareAndSet(false, true)) {
+            if (
+                ok &&
+                torque.hasFullPermissions() &&
+                MaintenanceConfig.AUTO_MAINTENANCE_ON_CONNECT == 1 &&
+                automaticPassStarted.compareAndSet(false, true)
+            ) {
                 runAutomaticPass()
             }
         }
@@ -68,8 +79,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runAutomaticPass() {
-        runOnUiThread {
-            setBusy(true, "Automatic module scan / history cleanup running silently...")
+        if (MaintenanceConfig.SILENT_AUTOMATIC_PASS != 1) {
+            runOnUiThread {
+                setBusy(true, "Automatic module scan / cleanup running...")
+            }
         }
 
         io.execute {
@@ -77,8 +90,14 @@ class MainActivity : AppCompatActivity() {
             MaintenanceLog.append(this, report)
 
             runOnUiThread {
-                setBusy(false, "Automatic maintenance pass complete")
-                renderMaintenance(report)
+                if (MaintenanceConfig.SILENT_AUTOMATIC_PASS != 1) {
+                    setBusy(false, "Automatic maintenance pass complete")
+                    renderMaintenance(report)
+                } else {
+                    scanButton.isEnabled = true
+                    clearButton.isEnabled = true
+                    statusText.text = "Connected — automatic maintenance logged"
+                }
                 logText.text = MaintenanceLog.summary(this)
             }
         }
@@ -117,6 +136,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun performManualEbcmClear() {
+        if (!connected) {
+            statusText.text = "Torque is not connected."
+            return
+        }
+
         setBusy(true, "Verifying stationary vehicle and clearing EBCM once...")
         io.execute {
             val result = engine.clearEbcmManuallyWhenStationary()
@@ -217,6 +241,8 @@ class MainActivity : AppCompatActivity() {
             "current fault logged; not repeatedly erased"
         AutoDecision.CLEAR_HISTORY_ONCE ->
             "history-only watched code cleared once"
+        AutoDecision.CLEAR_CURRENT_NON_SAFETY_ONCE ->
+            "current non-safety watched code clear attempted once"
     }
 
     private fun setBusy(busy: Boolean, message: String) {
