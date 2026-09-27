@@ -29,6 +29,15 @@ class MaintenancePolicyTest {
     }
 
     @Test
+    fun stillClassifiesCurrentC1242WhenStationaryCheckFails() {
+        val s = snapshot(C5Modules.EBCM, listOf("C1242"), listOf("C1242"))
+        assertEquals(
+            AutoDecision.CURRENT_SAFETY_FAULT_BLOCKED,
+            MaintenancePolicy.decide(s, stationaryVerified = false)
+        )
+    }
+
+    @Test
     fun clearsHistoryOnlyC1242OnceWhenStationary() {
         val s = snapshot(C5Modules.EBCM, emptyList(), listOf("C1242"))
         assertEquals(

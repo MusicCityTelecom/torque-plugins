@@ -25,6 +25,24 @@ object ProtocolParser {
         return null
     }
 
+    fun parseWheelSpeedsKph(lines: List<String>): List<Double>? {
+        for (frame in frames(lines)) {
+            if (frame.size < 7) continue
+            for (i in 0..frame.size - 7) {
+                if (frame[i] == 0x6A && frame[i + 1] == 0x20) {
+                    return listOf(
+                        frame[i + 2].toDouble(),
+                        frame[i + 3].toDouble(),
+                        frame[i + 4].toDouble(),
+                        frame[i + 5].toDouble(),
+                        frame[i + 6].toDouble()
+                    )
+                }
+            }
+        }
+        return null
+    }
+
     fun clearAcknowledged(lines: List<String>): Boolean {
         for (frame in frames(lines)) {
             val start = payloadStart(frame)

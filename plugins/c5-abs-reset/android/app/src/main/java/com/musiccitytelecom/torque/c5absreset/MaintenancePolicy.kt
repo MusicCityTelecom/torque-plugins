@@ -12,10 +12,6 @@ object MaintenancePolicy {
             return AutoDecision.NO_WATCHED_CODE
         }
 
-        if (!stationaryVerified) {
-            return AutoDecision.NOT_STATIONARY
-        }
-
         if (!snapshot.currentReadResponded) {
             return AutoDecision.CURRENT_READ_UNVERIFIED
         }
@@ -26,6 +22,10 @@ object MaintenancePolicy {
 
         if (currentWatched.isNotEmpty()) {
             return AutoDecision.ACTIVE_FAULT_LOGGED
+        }
+
+        if (!stationaryVerified) {
+            return AutoDecision.NOT_STATIONARY
         }
 
         if (historyOnly.isNotEmpty()) {
