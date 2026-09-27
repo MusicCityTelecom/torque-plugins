@@ -32,9 +32,33 @@ class ResponseParserTest {
     }
 
     @Test
+    fun parsesWheelPacketBeforeTorqueDataErrorTrailer() {
+        val wheel = ResponseParser.parseWheelPacket(
+            listOf("6A200000000000<DATA ERROR")
+        )
+        assertNotNull(wheel)
+        assertEquals(0.0, wheel!!.lfKph, 0.0)
+        assertEquals(0.0, wheel.rfKph, 0.0)
+        assertEquals(0.0, wheel.lrKph, 0.0)
+        assertEquals(0.0, wheel.rrKph, 0.0)
+    }
+
+    @Test
+    fun parsesMode01BeforeTorqueDataErrorTrailer() {
+        val payload = ResponseParser.parseMode01(
+            listOf("6CF110410C1AF8<DATA ERROR"),
+            0x0C,
+            2
+        )
+        assertNotNull(payload)
+        assertEquals(0x1AF8, ResponseParser.u16(payload!!))
+    }
+
+    @Test
     fun ignoresAdapterStatusText() {
         assertNull(ResponseParser.cleanHexLine("SEARCHING..."))
         assertNull(ResponseParser.cleanHexLine("NO DATA"))
+        assertNull(ResponseParser.cleanHexLine("<DATA ERROR"))
     }
 
     @Test

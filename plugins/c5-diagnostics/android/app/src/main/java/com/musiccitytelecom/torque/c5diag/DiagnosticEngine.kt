@@ -28,8 +28,8 @@ class DiagnosticEngine(
     private var executor: ScheduledExecutorService? = null
     private val jobs = mutableListOf<PollJob>()
     private val values = linkedMapOf<String, Double>()
-    private val misfireCurrent = IntArray(8)
-    private val misfireHistory = IntArray(8)
+    private val misfireCurrent = IntArray(8) { -1 }
+    private val misfireHistory = IntArray(8) { -1 }
     private val misfireSession = LongArray(8)
     private val lastCurrent = IntArray(8) { -1 }
 
@@ -49,8 +49,8 @@ class DiagnosticEngine(
         sessionId = UUID.randomUUID().toString()
         startedAtMs = System.currentTimeMillis()
         values.clear()
-        misfireCurrent.fill(0)
-        misfireHistory.fill(0)
+        misfireCurrent.fill(-1)
+        misfireHistory.fill(-1)
         misfireSession.fill(0)
         lastCurrent.fill(-1)
         samples.clear()

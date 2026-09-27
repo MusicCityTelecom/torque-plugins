@@ -5,13 +5,28 @@ object ResponseParser {
         lines.mapNotNull { cleanHexLine(it) }
 
     fun cleanHexLine(raw: String): ByteArray? {
-        val trimmed = raw.trim().trimEnd('>')
-        if (trimmed.isEmpty()) return null
+        /*
+         * Torque/ELM adapters sometimes return a valid frame followed by a
+         * status trailer on the same string, for example:
+         *
+         *   6A200000000000<DATA ERROR
+         *
+         * Keep the valid frame before '<' and discard the adapter status
+         * trailer. Status-only strings such as "NO DATA" and "SEARCHING..."
+         * still fail the strict hex check below.
+         */
+        val candidate = raw
+            .trim()
+            .trimEnd('>')
+            .substringBefore('<')
+            .trim()
+
+        if (candidate.isEmpty()) return null
 
         // Reject adapter/status text instead of accidentally extracting A-F letters from it.
-        if (!trimmed.matches(Regex("^[0-9A-Fa-f :\\t-]+$"))) return null
+        if (!candidate.matches(Regex("^[0-9A-Fa-f :\\t-]+$"))) return null
 
-        val hex = trimmed.replace(Regex("[^0-9A-Fa-f]"), "")
+        val hex = candidate.replace(Regex("[^0-9A-Fa-f]"), "")
         if (hex.length < 2 || hex.length % 2 != 0) return null
 
         return try {

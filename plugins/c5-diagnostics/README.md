@@ -85,3 +85,12 @@ Reports contain the VIN only if the user explicitly enters one in plugin setting
 ## Scope
 
 Version 0.1 is intentionally read-only. It does not perform module programming, actuator commands, security access, DTC clearing, relearns, or configuration writes.
+
+
+## 0.1.1 field-test fix
+
+The first in-car test showed Torque returning valid Class 2 data followed by an adapter status trailer on the same response string, for example:
+
+    6A200000000000<DATA ERROR
+
+The parser now preserves the valid hex frame before the '<' delimiter and ignores the status trailer. Misfire counters also remain '--' until a real PID response has been parsed, rather than displaying a misleading default zero.

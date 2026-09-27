@@ -145,20 +145,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         for (i in 0 until 8) {
-            misfireViews[i].text = String.format(
-                Locale.US,
-                "C%d  current %d   history %d   session +%d",
-                i + 1,
-                s.misfireCurrent[i],
-                s.misfireHistory[i],
-                s.misfireSession[i]
-            )
+            val current = if (s.misfireCurrent[i] >= 0) s.misfireCurrent[i].toString() else "--"
+            val history = if (s.misfireHistory[i] >= 0) s.misfireHistory[i].toString() else "--"
+            misfireViews[i].text =
+                "C${i + 1}  current $current   history $history   session +${s.misfireSession[i]}"
         }
 
         val w = s.wheelSpeeds
         if (w != null) {
             wheelStatusText.text =
-                "Candidate EBCM 6A20 packet matched — verify against known speed before treating as confirmed"
+                if (s.rawWheelResponse?.contains("<DATA ERROR", ignoreCase = true) == true) {
+                    "Candidate EBCM 6A20 packet matched; Torque DATA ERROR trailer ignored — verify while moving"
+                } else {
+                    "Candidate EBCM 6A20 packet matched — verify against known speed before treating as confirmed"
+                }
             val vals = doubleArrayOf(w.lfKph, w.rfKph, w.lrKph, w.rrKph)
             val names = arrayOf("LF", "RF", "LR", "RR")
             for (i in vals.indices) {
