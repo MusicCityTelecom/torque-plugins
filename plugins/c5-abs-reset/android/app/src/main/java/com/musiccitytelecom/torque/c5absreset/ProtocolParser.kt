@@ -52,9 +52,9 @@ object ProtocolParser {
             val useful = raw.substringBefore('<')
             for (match in frameRegex.findAll(useful)) {
                 val hex = match.value.filter { it.isDigit() || it.lowercaseChar() in 'a'..'f' }
-                if (hex.length < 4 || hex.length % 2 != 0) continue
+                if (hex.length < 2 || hex.length % 2 != 0) continue
                 val bytes = hex.chunked(2).mapNotNull { it.toIntOrNull(16) }
-                if (bytes.size >= 2) out += bytes
+                if (bytes.isNotEmpty()) out += bytes
             }
         }
         return out
