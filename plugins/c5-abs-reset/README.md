@@ -87,11 +87,14 @@ They use simple `0` / `1` values so a custom build can be changed without tracin
     AUTO_MAINTENANCE_ON_CONNECT = 1
     AUTO_CLEAR_HISTORY = 1
     AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE = 0
+    AUTO_CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE = 0
     ONE_TAP_EBCM_CLEAR = 1
     SILENT_AUTOMATIC_PASS = 1
 
-Setting `AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE = 1` permits one automatic stationary clear attempt per app launch for the watched BCM/HVAC/RDCM current codes. It does not include current EBCM safety DTCs such as C1242.
+Setting `AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE = 1` permits one automatic stationary clear attempt per app launch for the watched BCM/HVAC/RDCM current codes.
+
+Setting `AUTO_CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE = 1` permits one automatic service-14 clear attempt per app launch when C1242 is current and the two-sample speed interlock verifies 0 km/h. It does not disable the stationary interlock and it does not create a continuous in-motion clearing loop.
 
 `ONE_TAP_EBCM_CLEAR = 1` makes the manual EBCM button execute the existing one-shot stationary clear immediately instead of displaying a confirmation dialog.
 
-The stationary interlock remains active for every clear request.
+The stationary interlock remains active for every clear request, including the optional automatic current-C1242 clear.

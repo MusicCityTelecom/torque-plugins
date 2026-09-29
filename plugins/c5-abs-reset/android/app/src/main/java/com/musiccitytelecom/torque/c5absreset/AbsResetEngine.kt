@@ -119,7 +119,8 @@ class AbsResetEngine(private val torque: TorqueClient) {
             val decision = MaintenancePolicy.decide(before, stationary.verified)
 
             val shouldClear = decision == AutoDecision.CLEAR_HISTORY_ONCE ||
-                decision == AutoDecision.CLEAR_CURRENT_NON_SAFETY_ONCE
+                decision == AutoDecision.CLEAR_CURRENT_NON_SAFETY_ONCE ||
+                decision == AutoDecision.CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE
 
             if (shouldClear) {
                 Thread.sleep(BUS_GAP_MS)
