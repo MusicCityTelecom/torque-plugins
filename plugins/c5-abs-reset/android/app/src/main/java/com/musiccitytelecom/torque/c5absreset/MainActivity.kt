@@ -243,6 +243,8 @@ class MainActivity : AppCompatActivity() {
             "history-only watched code cleared once"
         AutoDecision.CLEAR_CURRENT_NON_SAFETY_ONCE ->
             "current non-safety watched code clear attempted once"
+        AutoDecision.CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE ->
+            "current C1242 stationary clear attempted once"
     }
 
     private fun setBusy(busy: Boolean, message: String) {
