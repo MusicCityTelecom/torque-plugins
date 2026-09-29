@@ -6,7 +6,9 @@ object MaintenancePolicy {
         stationaryVerified: Boolean,
         autoClearHistory: Boolean = MaintenanceConfig.AUTO_CLEAR_HISTORY == 1,
         autoClearCurrentNonSafety: Boolean =
-            MaintenanceConfig.AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE == 1
+            MaintenanceConfig.AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE == 1,
+        autoClearCurrentC1242WhenStationary: Boolean =
+            MaintenanceConfig.AUTO_CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE == 1
     ): AutoDecision {
         val currentWatched = snapshot.currentWatched
         val historyOnly = snapshot.historyOnlyWatched
@@ -20,7 +22,18 @@ object MaintenancePolicy {
         }
 
         if (snapshot.profile.safetyCritical && currentWatched.isNotEmpty()) {
-            return AutoDecision.CURRENT_SAFETY_FAULT_BLOCKED
+            if (!stationaryVerified) {
+                return AutoDecision.NOT_STATIONARY
+            }
+
+            return if (
+                autoClearCurrentC1242WhenStationary &&
+                currentWatched.all { it.code == "C1242" }
+            ) {
+                AutoDecision.CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE
+            } else {
+                AutoDecision.CURRENT_SAFETY_FAULT_BLOCKED
+            }
         }
 
         if (currentWatched.isNotEmpty()) {
