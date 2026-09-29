@@ -5,9 +5,8 @@ package com.musiccitytelecom.torque.c5absreset
  *
  * Change 0 -> 1 or 1 -> 0, rebuild the APK, and reinstall it.
  *
- * These switches intentionally do not include a continuous active-EBCM
- * safety-fault suppressor. A current C1242 can still be cleared manually
- * with the one-shot EBCM clear while the car is verified stationary.
+ * Current EBCM/C1242 clearing can be automated for a single attempt while
+ * stationary, but the stationary interlock is intentionally not configurable.
  */
 object MaintenanceConfig {
     // Run one maintenance pass after Torque connects.
@@ -17,8 +16,13 @@ object MaintenanceConfig {
     const val AUTO_CLEAR_HISTORY = 1
 
     // Optional: one automatic clear attempt per app launch for CURRENT
-    // BCM/HVAC/RDCM watched DTCs. EBCM safety DTCs are excluded.
+    // BCM/HVAC/RDCM watched DTCs.
     const val AUTO_CLEAR_CURRENT_NON_SAFETY_ONCE = 0
+
+    // Optional: one automatic clear attempt per app launch for a CURRENT
+    // watched EBCM code (currently C1242), but only after two stationary
+    // samples verify 0 km/h.
+    const val AUTO_CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE = 0
 
     // Skip the confirmation dialog on the manual EBCM button.
     // The two-sample stationary interlock still applies.
