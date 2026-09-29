@@ -20,7 +20,7 @@ class MaintenancePolicyTest {
     }
 
     @Test
-    fun blocksCurrentC1242EvenWhenNonSafetyOverrideIsEnabled() {
+    fun blocksCurrentC1242ByDefault() {
         val s = snapshot(C5Modules.EBCM, listOf("C1242"), listOf("C1242"))
         assertEquals(
             AutoDecision.CURRENT_SAFETY_FAULT_BLOCKED,
@@ -28,7 +28,38 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = true,
                 autoClearHistory = true,
-                autoClearCurrentNonSafety = true
+                autoClearCurrentNonSafety = true,
+                autoClearCurrentC1242WhenStationary = false
+            )
+        )
+    }
+
+    @Test
+    fun optInClearsCurrentC1242OnceWhenStationary() {
+        val s = snapshot(C5Modules.EBCM, listOf("C1242"), listOf("C1242"))
+        assertEquals(
+            AutoDecision.CLEAR_CURRENT_C1242_WHEN_STATIONARY_ONCE,
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = true,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = false,
+                autoClearCurrentC1242WhenStationary = true
+            )
+        )
+    }
+
+    @Test
+    fun optInDoesNotClearCurrentC1242WhenMoving() {
+        val s = snapshot(C5Modules.EBCM, listOf("C1242"), listOf("C1242"))
+        assertEquals(
+            AutoDecision.NOT_STATIONARY,
+            MaintenancePolicy.decide(
+                s,
+                stationaryVerified = false,
+                autoClearHistory = true,
+                autoClearCurrentNonSafety = false,
+                autoClearCurrentC1242WhenStationary = true
             )
         )
     }
@@ -42,7 +73,8 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = true,
                 autoClearHistory = true,
-                autoClearCurrentNonSafety = false
+                autoClearCurrentNonSafety = false,
+                autoClearCurrentC1242WhenStationary = false
             )
         )
     }
@@ -56,7 +88,8 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = true,
                 autoClearHistory = false,
-                autoClearCurrentNonSafety = false
+                autoClearCurrentNonSafety = false,
+                autoClearCurrentC1242WhenStationary = false
             )
         )
     }
@@ -70,7 +103,8 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = true,
                 autoClearHistory = true,
-                autoClearCurrentNonSafety = true
+                autoClearCurrentNonSafety = true,
+                autoClearCurrentC1242WhenStationary = false
             )
         )
     }
@@ -84,7 +118,8 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = true,
                 autoClearHistory = true,
-                autoClearCurrentNonSafety = false
+                autoClearCurrentNonSafety = false,
+                autoClearCurrentC1242WhenStationary = false
             )
         )
     }
@@ -98,7 +133,8 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = false,
                 autoClearHistory = true,
-                autoClearCurrentNonSafety = true
+                autoClearCurrentNonSafety = true,
+                autoClearCurrentC1242WhenStationary = true
             )
         )
     }
@@ -117,7 +153,8 @@ class MaintenancePolicyTest {
                 s,
                 stationaryVerified = true,
                 autoClearHistory = true,
-                autoClearCurrentNonSafety = true
+                autoClearCurrentNonSafety = true,
+                autoClearCurrentC1242WhenStationary = true
             )
         )
     }
